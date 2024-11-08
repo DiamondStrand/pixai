@@ -3,20 +3,10 @@
 import React, { useState, FormEvent, ChangeEvent, useMemo } from 'react';
 import { searchImages as searchUnsplashImages } from '../services/unsplashService';
 import { searchImages as searchPexelsImages } from '../services/pexelsService';
-import { BadgeInfo } from 'lucide-react'; // Importera informationsikonen från Lucid-icons
+import { BadgeInfo } from 'lucide-react';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from './ui/sheet';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card'; // Importera card-komponenten från shadcn
-
-// Lägg till en hjälpfunktion för att blanda array
-function shuffleArray<T>(array: T[]): T[] {
-  const newArray = [...array];
-  for (let i = newArray.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-  }
-  return newArray;
-}
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 
 type SuggestedQuery = {
   query?: string;
@@ -38,7 +28,18 @@ type Photo = {
     small: string;
   };
   alt_description: string | null;
+  alt?: string;
 };
+
+// Lägg till shuffleArray-funktionen
+function shuffleArray<T>(array: T[]): T[] {
+  const newArray = [...array];
+  for (let i = newArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+  }
+  return newArray;
+}
 
 const SearchForm: React.FC = () => {
   const [query, setQuery] = useState<string>('');
@@ -64,16 +65,9 @@ const SearchForm: React.FC = () => {
         throw new Error('Network response was not ok');
       }
 
-      const data: SuggestedQuery = await response.json();
+      const data = await response.json();
       setSuggestedQuery(data);
 
-      // Om texten är olämplig eller irrelevant, visa ett meddelande och avbryt bildsökningen
-      if (data.isInappropriate || data.isIrrelevant) {
-        setLoading(false);
-        return;
-      }
-
-      // Annars sök efter bilder
       const [unsplashResults, pexelsResults] = await Promise.all([
         searchUnsplashImages({
           query: data.query!,
@@ -100,7 +94,6 @@ const SearchForm: React.FC = () => {
     setQuery(e.target.value);
   };
 
-  // Beräkna blandade bilder
   const allPhotos = useMemo(() => {
     const normalizedPhotos = [
       ...unsplashPhotos.map((photo) => ({
@@ -136,7 +129,6 @@ const SearchForm: React.FC = () => {
         </button>
       </form>
 
-      {/* Om texten är olämplig, visa ett varningsmeddelande */}
       {suggestedQuery?.isInappropriate && (
         <div className="py-20 px-12 flex justify-center">
           <Card className="w-full max-w-lg">
@@ -153,7 +145,6 @@ const SearchForm: React.FC = () => {
         </div>
       )}
 
-      {/* Om texten är irrelevant, visa ett annat meddelande */}
       {suggestedQuery?.isIrrelevant && (
         <div className="py-20 px-12 flex justify-center">
           <Card className="w-full max-w-lg">
@@ -170,57 +161,51 @@ const SearchForm: React.FC = () => {
         </div>
       )}
 
-      {/* Combined Images */}
-      {allPhotos.length > 0 && !suggestedQuery?.isInappropriate && !suggestedQuery?.isIrrelevant && (
+      {allPhotos.length > 0 && (
         <div className="py-20 px-12">
           <div className="flex gap-2 items-center py-6">
             <h3 className="text-xl font-bold">Bilder</h3>
             {suggestedQuery && (
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="ghost">
-                    <BadgeInfo
-                      className="text-gray-600 cursor-pointer hover:text-blue-600"
-                      size={20}
-                    />
-                  </Button>
+                  <BadgeInfo
+                    className="text-gray-600 cursor-pointer hover:text-blue-600"
+                    size={20}
+                  />
                 </SheetTrigger>
                 <SheetContent>
                   <SheetHeader>
                     <SheetTitle>Sökparametrarna</SheetTitle>
                     <SheetDescription>
-                      Här är informationen om AI-genererade sökparametrar för att hjälpa dig hitta rätt bilder.
+                      <div className="my-4">
+                        <h4 className="font-semibold text-md">Sökterm:</h4>
+                        <p className="text-gray-800">{suggestedQuery.query}</p>
+                      </div>
+                      <div className="mb-3">
+                        <h4 className="font-semibold text-md">Orientering:</h4>
+                        <p className="text-gray-800 capitalize">{suggestedQuery.orientation}</p>
+                      </div>
+                      <div className="mb-3">
+                        <h4 className="font-semibold text-md">Storlek:</h4>
+                        <p className="text-gray-800 capitalize">{suggestedQuery.size}</p>
+                      </div>
+                      <div className="mb-3">
+                        <h4 className="font-semibold text-md">Färgtema:</h4>
+                        <p className="text-gray-800 capitalize">{suggestedQuery.color}</p>
+                      </div>
                     </SheetDescription>
                   </SheetHeader>
-                  <div className="my-4">
-                    <div className="mb-3">
-                      <h4 className="font-semibold text-md">Sökterm:</h4>
-                      <p className="text-gray-800">{suggestedQuery.query}</p>
-                    </div>
-                    <div className="mb-3">
-                      <h4 className="font-semibold text-md">Orientering:</h4>
-                      <p className="text-gray-800 capitalize">{suggestedQuery.orientation}</p>
-                    </div>
-                    <div className="mb-3">
-                      <h4 className="font-semibold text-md">Storlek:</h4>
-                      <p className="text-gray-800 capitalize">{suggestedQuery.size}</p>
-                    </div>
-                    <div className="mb-3">
-                      <h4 className="font-semibold text-md">Färgtema:</h4>
-                      <p className="text-gray-800 capitalize">{suggestedQuery.color}</p>
-                    </div>
-                  </div>
                 </SheetContent>
               </Sheet>
             )}
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {allPhotos.map((photo) => (
-              <div key={photo.id} className="relative group rounded-lg overflow-hidden">
+              <div key={photo.id} className="relative aspect-video group">
                 <img
                   src={photo.url}
                   alt={photo.alt || 'Photo'}
-                  className="object-cover w-full h-full"
+                  className="object-cover w-full h-full rounded-lg"
                 />
                 <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   Källa: {photo.source}

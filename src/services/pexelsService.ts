@@ -21,7 +21,10 @@ export const searchImages = async ({ query, orientation, color }: SearchParams) 
       throw new Error((result as ErrorResponse).error);
     }
 
-    return (result as PhotosWithTotalResults).photos;
+    return (result as PhotosWithTotalResults).photos.map(photo => ({
+      ...photo,
+      alt_description: photo.alt // Lägg till denna rad
+    }));
   } catch (error) {
     console.error('Error searching Pexels images:', error);
     throw error;
