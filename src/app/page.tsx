@@ -1,101 +1,82 @@
 import Image from "next/image";
+import SearchForm from "../components/SearchForm";
+import { Button } from '../components/ui/button';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '../components/ui/sheet';
+import Head from 'next/head';
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+    <>
+      <Head>
+        <title>PixAI - AI-driven bildsökning</title>
+        <meta name="description" content="PixAI använder AI för att hjälpa dig hitta den perfekta bilden från Pexels, Unsplash och vår egen bildbank. Klistra bara in din text – resten sköter vi!" />
+        <meta name="keywords" content="PixAI, bildsökning, AI, Pexels, Unsplash, bildbank" />
+        <meta name="author" content="Cookify Media" />
+        <meta property="og:title" content="PixAI - AI-driven bildsökning" />
+        <meta property="og:description" content="PixAI använder AI för att hjälpa dig hitta den perfekta bilden från Pexels, Unsplash och vår egen bildbank. Klistra bara in din text – resten sköter vi!" />
+        <meta property="og:image" content="/pixailogo.png" />
+        <meta property="og:url" content="https://www.pixai.com" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="PixAI - AI-driven bildsökning" />
+        <meta name="twitter:description" content="PixAI använder AI för att hjälpa dig hitta den perfekta bilden från Pexels, Unsplash och vår egen bildbank. Klistra bara in din text – resten sköter vi!" />
+        <meta name="twitter:image" content="/pixailogo.png" />
+      </Head>
+      <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-50">
+        <header className="flex flex-col items-center mb-16 p-8 sm:p-20">
           <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+            className="dark:invert"
+            src="/pixailogo.png"
+            alt="PixAI logo"
+            width={180}
+            height={38}
+            priority
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+          <h1 className="text-5xl font-bold mt-8 text-center">
+            Välkommen till PixAI
+          </h1>
+          <p className="text-lg mt-4 text-center max-w-2xl">
+            PixAI använder AI för att hjälpa dig hitta den perfekta bilden från Pexels, Unsplash och vår egen bildbank. Klistra bara in din text – resten sköter vi!
+          </p>
+          {/* Lägg till Läs mer-knappen här */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="default" className="mt-4">
+                Läs mer om PixAI
+              </Button>
+            </SheetTrigger>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle>Vad är PixAI?</SheetTitle>
+                <SheetDescription>
+                  Här är en mer detaljerad beskrivning av vad PixAI kan erbjuda.
+                </SheetDescription>
+              </SheetHeader>
+              <div className="my-4">
+                <p className="mb-4 text-gray-800">
+                  PixAI är en innovativ bildsökningsapp som använder kraften i AI för att hjälpa dig hitta exakt de bilder du behöver – snabbt och enkelt. Genom att analysera den text du klistrar in, oavsett om det handlar om en bloggartikel, ett event, en produkt eller en tjänst, genererar vår AI automatiskt de bästa sökparametrarna för att hitta de mest passande bilderna. 
+                </p>
+                <p className="mb-4 text-gray-800">
+                  Vi söker genom Pexels, Unsplash och vår egen bildbank för att ge dig tillgång till ett stort urval av högkvalitativa bilder som fångar rätt känsla och stämning för ditt projekt. PixAI är utformad för att göra bildsökningen enkel, effektiv och träffsäker – så att du kan fokusera på att skapa engagerande innehåll.
+                </p>
+                <p className="text-gray-800">
+                  Med PixAI kan du ta din kreativa process till nästa nivå, oavsett om du skapar marknadsföringsmaterial, uppdaterar din blogg, arrangerar ett event eller presenterar en ny produkt. Låt vår AI göra jobbet åt dig och få förslag på bilder som är skräddarsydda för dina behov – alltid redo att användas med ett klick.
+                </p>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </header>
+        <main className="w-full mx-auto flex-grow">
+          <SearchForm />
+        </main>
+        <footer className="w-full bg-gray-800 text-gray-200 py-4 px-4 mt-auto">
+          <div className="flex flex-col items-center">
+            <p className="text-sm text-center">
+              &copy; {new Date().getFullYear()} PixAI. All rights reserved. Ägs och underhålls av 
+              <span className="font-bold"> Cookify</span><span className="text-[#FF9A04]">Media</span>.
+            </p>
+          </div>
+        </footer>
+      </div>
+    </>
   );
 }
