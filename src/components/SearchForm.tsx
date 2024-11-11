@@ -3,10 +3,10 @@
 import React, { useState, FormEvent, ChangeEvent, useMemo } from 'react';
 import { searchImages as searchUnsplashImages } from '../services/unsplashService';
 import { searchImages as searchPexelsImages } from '../services/pexelsService';
-import { BadgeInfo } from 'lucide-react';
-import { Button } from './ui/button';
+import { BadgeInfo, Check, Copy } from 'lucide-react';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from './ui/sheet';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
 
 type SuggestedQuery = {
   query?: string;
@@ -15,20 +15,6 @@ type SuggestedQuery = {
   color?: string;
   isInappropriate?: boolean;
   isIrrelevant?: boolean;
-};
-
-type Photo = {
-  id: string;
-  urls?: {
-    regular: string;
-    small: string;
-  };
-  src?: {
-    medium: string;
-    small: string;
-  };
-  alt_description: string | null;
-  alt?: string;
 };
 
 // Lägg till shuffleArray-funktionen
@@ -45,8 +31,10 @@ const SearchForm: React.FC = () => {
   const [query, setQuery] = useState<string>('');
   const [suggestedQuery, setSuggestedQuery] = useState<SuggestedQuery | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [unsplashPhotos, setUnsplashPhotos] = useState<Photo[]>([]);
-  const [pexelsPhotos, setPexelsPhotos] = useState<Photo[]>([]);
+  const [unsplashPhotos, setUnsplashPhotos] = useState<NormalizedPhoto[]>([]);
+  const [pexelsPhotos, setPexelsPhotos] = useState<NormalizedPhoto[]>([]);
+  const [selectedPhoto, setSelectedPhoto] = useState<NormalizedPhoto | null>(null);
+  const [copySuccess, setCopySuccess] = useState<boolean>(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -96,21 +84,21 @@ const SearchForm: React.FC = () => {
 
   const allPhotos = useMemo(() => {
     const normalizedPhotos = [
-      ...unsplashPhotos.map((photo) => ({
-        id: photo.id,
-        url: photo.urls?.regular || '',
-        alt: photo.alt_description,
-        source: 'Unsplash',
-      })),
-      ...pexelsPhotos.map((photo) => ({
-        id: photo.id,
-        url: photo.src?.medium || '',
-        alt: photo.alt_description,
-        source: 'Pexels',
-      })),
+      ...unsplashPhotos,
+      ...pexelsPhotos,
     ];
     return shuffleArray(normalizedPhotos);
   }, [unsplashPhotos, pexelsPhotos]);
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000); // Återställ efter 2 sekunder
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
+  };
 
   return (
     <div>
@@ -201,16 +189,97 @@ const SearchForm: React.FC = () => {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {allPhotos.map((photo) => (
-              <div key={photo.id} className="relative aspect-video group">
-                <img
-                  src={photo.url}
-                  alt={photo.alt || 'Photo'}
-                  className="object-cover w-full h-full rounded-lg"
-                />
-                <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  Källa: {photo.source}
-                </div>
-              </div>
+              <Dialog key={photo.id}>
+                <DialogTrigger asChild>
+                  <div className="relative aspect-video group cursor-pointer" onClick={() => setSelectedPhoto(photo)}>
+                    <img
+                      src={photo.url}
+                      alt={photo.alt || 'Photo'}
+                      className="object-cover w-full h-full rounded-lg"
+                    />
+                    <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      Källa: {photo.source}
+                    </div>
+                  </div>
+                </DialogTrigger>
+                <DialogContent className="max-w-6xl mx-auto">
+                  <DialogHeader>
+                    <DialogTitle className='py-4'>Bildinformation</DialogTitle>
+                    <DialogDescription>
+                      <div className="flex flex-col sm:flex-row gap-8">
+                        <img
+                          src={photo.url}
+                          alt={photo.alt || 'Photo'}
+                          className="object-cover w-full sm:w-4/6 rounded-lg"
+                        />
+                        <div className="sm:ml-4 mt-4 sm:mt-0 w-full">
+                          <div>
+                            <h4 className="font-semibold text-md">Fotograf:</h4>
+                            <p className="text-gray-800">
+                              <a href={photo.photographer_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                                {photo.photographer}
+                              </a>
+                            </p>
+                          </div>
+                          <div className="mt-4">
+                            <h4 className="font-semibold text-md">Referera till fotografen:</h4>
+                            <div className="flex items-center gap-2">
+                              <p className="text-gray-800">Foto av: {photo.photographer} från {photo.source}</p>
+                              <button
+                                onClick={() => copyToClipboard(`Foto av: ${photo.photographer} från ${photo.source}`)}
+                                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                              >
+                                {copySuccess ? (
+                                  <Check className="text-green-500" size={20}/>
+                                ) : (
+                                  <Copy className="text-gray-800" size={20} />
+                                )}
+                              </button>
+                            </div>
+                          </div>
+                          <div className="mt-4">
+                            <h4 className="font-semibold text-md">Källa:</h4>
+                            <p className="text-gray-800 capitalize">{photo.source}</p>
+                            <a href={photo.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                              Visa på {photo.source}
+                            </a>
+                          </div>
+                          <div className="mt-4">
+                            <h4 className="font-semibold text-md">Nedladdningslänkar:</h4>
+                            <div className="flex flex-col gap-2 mt-2">
+                              {photo.downloadUrls?.original && (
+                                <a href={photo.downloadUrls.original} download className="bg-blue-600 text-white py-2 px-4 rounded-lg text-center">
+                                  Original
+                                </a>
+                              )}
+                              {photo.downloadUrls?.large2x && (
+                                <a href={photo.downloadUrls.large2x} download className="bg-blue-600 text-white py-2 px-4 rounded-lg text-center">
+                                  Large 2x
+                                </a>
+                              )}
+                              {photo.downloadUrls?.large && (
+                                <a href={photo.downloadUrls.large} download className="bg-blue-600 text-white py-2 px-4 rounded-lg text-center">
+                                  Large
+                                </a>
+                              )}
+                              {photo.downloadUrls?.medium && (
+                                <a href={photo.downloadUrls.medium} download className="bg-blue-600 text-white py-2 px-4 rounded-lg text-center">
+                                  Medium
+                                </a>
+                              )}
+                              {photo.downloadUrls?.small && (
+                                <a href={photo.downloadUrls.small} download className="bg-blue-600 text-white py-2 px-4 rounded-lg text-center">
+                                  Small
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </DialogDescription>
+                  </DialogHeader>
+                </DialogContent>
+              </Dialog>
             ))}
           </div>
         </div>
