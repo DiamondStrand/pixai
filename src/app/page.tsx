@@ -3,6 +3,7 @@ import SearchForm from "../components/SearchForm";
 import { Button } from '../components/ui/button';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '../components/ui/sheet';
 import Head from 'next/head';
+import FeedbackForm from "@/components/FeedbackForm";
 
 export default function Home() {
   return (
@@ -67,6 +68,7 @@ export default function Home() {
         </header>
         <main className="w-full mx-auto flex-grow">
           <SearchForm />
+          <FeedbackForm />
         </main>
         <footer className="w-full bg-gray-800 text-gray-200 py-4 px-4 mt-auto">
           <div className="flex flex-col items-center">
