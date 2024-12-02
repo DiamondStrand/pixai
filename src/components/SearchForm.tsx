@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useState, FormEvent, ChangeEvent, useMemo } from 'react';
-import { searchImages as searchUnsplashImages } from '../services/unsplashService';
-import { searchImages as searchPexelsImages } from '../services/pexelsService';
+import { searchUnsplashImages } from '../services/unsplashService';
+import { searchPexelsImages } from '../services/pexelsService';
 import { BadgeInfo, Check, Copy } from 'lucide-react';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from './ui/sheet';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
+import { NormalizedPhoto } from '@/lib/types';
 
 type SuggestedQuery = {
   query?: string;

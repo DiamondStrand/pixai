@@ -1,6 +1,9 @@
 import { openai } from "@/app/openai";
 import { createClient } from "@/utils/supabase/server";
-import { AssistantMessageContent, ThreadMessage } from "@/lib/types";
+import {
+  MessageContent,
+  TextContentBlock,
+} from "openai/resources/beta/threads/messages.mjs";
 
 export const runtime = "nodejs";
 
@@ -11,16 +14,16 @@ export async function POST(request: Request) {
     const body = await request.json();
 
     if (!assistantId) {
-      return Response.json(
-        { error: "Missing Assistant ID in environment" },
-        { status: 400 }
+      return new Response(
+        JSON.stringify({ error: "Missing Assistant ID in environment" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
     if (!body?.content) {
-      return Response.json(
-        { error: "Missing content in request body" },
-        { status: 400 }
+      return new Response(
+        JSON.stringify({ error: "Missing content in request body" }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
@@ -31,7 +34,6 @@ export async function POST(request: Request) {
       content: body.content,
     });
 
-    // Generera en titel och beskrivning från OpenAI baserat på användarens innehåll
     const titleAndDescriptionResponse = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
@@ -48,21 +50,13 @@ export async function POST(request: Request) {
       max_tokens: 100,
     });
 
-    // Extrahera och rensa svar från OpenAI
     const responseText =
       titleAndDescriptionResponse.choices[0]?.message?.content || "";
 
-    // Separera resultat och ta bort potentiella metadata-ord som "Titel" om de förekommer
     const lines = responseText.split("\n").filter(Boolean);
-    let title = "";
-    let description = "";
-
-    if (lines.length > 0) {
-      title = lines[0].replace(/^Titel:\s*/, "").trim();
-      description = lines[1]
-        ? lines[1].replace(/^Beskrivning:\s*/, "").trim()
-        : body.content;
-    }
+    let title = lines[0]?.replace(/^Titel:\s*/, "").trim() || "";
+    let description =
+      lines[1]?.replace(/^Beskrivning:\s*/, "").trim() || body.content;
 
     const run = await openai.beta.threads.runs.create(thread.id, {
       assistant_id: assistantId,
@@ -77,27 +71,43 @@ export async function POST(request: Request) {
       runStatus = await openai.beta.threads.runs.retrieve(thread.id, run.id);
     }
 
-    // Hämta AI-svar med sökparametrar och extrahera "query" JSON
     const messages = await openai.beta.threads.messages.list(thread.id);
     const assistantResponse = messages.data.find(
       (msg) => msg.role === "assistant"
     );
 
+    function isTextContentBlock(
+      content: MessageContent
+    ): content is TextContentBlock {
+      return (
+        "type" in content &&
+        content.type === "text" &&
+        "text" in content &&
+        content.text !== null &&
+        typeof content.text === "object" &&
+        "value" in content.text
+      );
+    }
+
     let currentQuery = {};
+
     if (assistantResponse && assistantResponse.content) {
       try {
-        const responseContent = Array.isArray(assistantResponse.content)
-          ? (assistantResponse.content as AssistantMessageContent[])[0].text
-              .value
-          : (assistantResponse.content as AssistantMessageContent).text.value;
-
-        currentQuery = JSON.parse(responseContent); // Parse the JSON string to an object
+        const content = assistantResponse.content;
+        if (Array.isArray(content)) {
+          const textContent = content.find(isTextContentBlock);
+          if (textContent && textContent.text.value) {
+            currentQuery = JSON.parse(textContent.text.value);
+          }
+        } else if (isTextContentBlock(content)) {
+          const textContent = content as TextContentBlock;
+          currentQuery = JSON.parse(textContent.text.value);
+        }
       } catch (error) {
         console.error("Error parsing assistant response as JSON:", error);
       }
     }
 
-    // Replace database insert with Supabase
     const supabase = await createClient();
     const { error: insertError } = await supabase.from("search_logs").insert({
       title,
@@ -110,15 +120,24 @@ export async function POST(request: Request) {
 
     if (insertError) {
       console.error("Error inserting into database:", insertError);
-      return Response.json({ error: "Failed to save search" }, { status: 500 });
+      return new Response(JSON.stringify({ error: "Failed to save search" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
-    return Response.json({
-      threadId: thread.id,
-      assistantResponse: assistantResponse ? assistantResponse.content : null,
-    });
+    return new Response(
+      JSON.stringify({
+        threadId: thread.id,
+        assistantResponse: assistantResponse ? assistantResponse.content : null,
+      }),
+      { headers: { "Content-Type": "application/json" } }
+    );
   } catch (error) {
     console.error("Error creating thread:", error);
-    return Response.json({ error: "Failed to create thread" }, { status: 500 });
+    return new Response(JSON.stringify({ error: "Failed to create thread" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }

@@ -1,14 +1,20 @@
-// api/threads/[threadsid]/actions/route.ts
+import { NextRequest, NextResponse } from "next/server";
 import { openai } from "@/app/openai";
 import { ToolCallOutput } from "@/lib/types";
-import { NextRequest } from "next/server";
 
 export async function POST(
   request: NextRequest,
-  context: { params: Record<string, string | string[]> }
+  context: { params: { threadId?: string } }
 ) {
   const { params } = context;
-  const threadId = params.threadId as string; // Säkerställ att det är en string
+  const threadId = params.threadId;
+
+  if (!threadId) {
+    return NextResponse.json(
+      { error: "Thread ID is missing" },
+      { status: 400 }
+    );
+  }
 
   const {
     toolCallOutputs,
@@ -28,9 +34,20 @@ export async function POST(
       { tool_outputs: transformedToolCallOutputs }
     );
 
-    return new Response(stream.toReadableStream());
+    // Använd `.toReadableStream()` om stream stöder det
+    const readableStream = stream.toReadableStream();
+
+    // Returnera som en respons
+    return new Response(readableStream, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
   } catch (error) {
     console.error("Error submitting tool outputs:", error);
-    return new Response("Failed to submit tool outputs", { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to submit tool outputs" },
+      { status: 500 }
+    );
   }
 }

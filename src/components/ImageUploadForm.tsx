@@ -5,8 +5,18 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { toast } from 'sonner';
+
+interface ImageFormData {
+  title: string;
+  description: string;
+  photographer: string;
+  email: string;
+  tags: string[];
+  imageUrl: string;
+  publicId: string;
+}
 import { Upload } from 'lucide-react';
-import { CloudinaryUploadResult, ImageFormData } from '@/lib/types';
+
 
 const ImageUploadForm: React.FC = () => {
   const [formData, setFormData] = useState<ImageFormData>({
@@ -20,18 +30,18 @@ const ImageUploadForm: React.FC = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleUploadSuccess = (result: CloudinaryUploadResult) => {
-    if (result.info && 'secure_url' in result.info && 'public_id' in result.info) {
-      setFormData(prev => ({
-        ...prev,
-        imageUrl: result.info.secure_url,
-        publicId: result.info.public_id
-      }));
-      toast.success('Bild uppladdad!');
-    } else {
-      toast.error('Uppladdningen misslyckades');
-    }
-  };
+  // const handleUploadSuccess = (result: CloudinaryUploadResult) => {
+  //   if (result.info && 'secure_url' in result.info && 'public_id' in result.info) {
+  //     setFormData(prev => ({
+  //       ...prev,
+  //       imageUrl: result.info.secure_url,
+  //       publicId: result.info.public_id
+  //     }));
+  //     toast.success('Bild uppladdad!');
+  //   } else {
+  //     toast.error('Uppladdningen misslyckades');
+  //   }
+  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

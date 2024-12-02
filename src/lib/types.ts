@@ -89,9 +89,19 @@ export interface AssistantMessageContent {
   };
 }
 
+// Remove our custom TextContent interface and MessageContent type
+// Instead, import these from OpenAI's types
+import type {
+  TextContentBlock,
+  MessageContent,
+} from "openai/resources/beta/threads/messages.mjs";
+
+export type { TextContentBlock, MessageContent };
+
+// Update ThreadMessage interface to use OpenAI's types
 export interface ThreadMessage {
   role: string;
-  content: AssistantMessageContent[] | AssistantMessageContent;
+  content: MessageContent[] | MessageContent;
 }
 
 export interface User {
