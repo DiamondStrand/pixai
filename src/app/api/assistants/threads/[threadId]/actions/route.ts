@@ -5,8 +5,11 @@ import { NextRequest } from "next/server";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { threadId: string } }
+  context: { params: Record<string, string | string[]> }
 ) {
+  const { params } = context;
+  const threadId = params.threadId as string; // Säkerställ att det är en string
+
   const {
     toolCallOutputs,
     runId,
@@ -20,7 +23,7 @@ export async function POST(
     }));
 
     const stream = openai.beta.threads.runs.submitToolOutputsStream(
-      params.threadId,
+      threadId,
       runId,
       { tool_outputs: transformedToolCallOutputs }
     );
