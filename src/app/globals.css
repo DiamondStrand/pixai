@@ -70,3 +70,27 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .shadow-card {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  .dark .shadow-card {
+    box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
+  }
+
+  .bg-pattern {
+    background-image: radial-gradient(
+        circle at 20% 20%,
+        rgba(255, 255, 255, 0.1) 1%,
+        transparent 1%
+      ),
+      radial-gradient(
+        circle at 80% 80%,
+        rgba(255, 255, 255, 0.05) 1%,
+        transparent 1%
+      );
+    background-size: 300px 300px;
+  }
+}
