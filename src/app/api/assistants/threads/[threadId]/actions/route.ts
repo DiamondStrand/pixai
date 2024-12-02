@@ -3,11 +3,10 @@ import { openai } from "@/app/openai";
 import { ToolCallOutput } from "@/lib/types";
 
 export async function POST(
-  request: NextRequest,
-  context: { params: { threadId?: string } }
+  request: Request,
+  { params }: { params: Promise<{ threadId: string }> }
 ) {
-  const { params } = context;
-  const threadId = params.threadId;
+  const { threadId } = await params;
 
   if (!threadId) {
     return NextResponse.json(

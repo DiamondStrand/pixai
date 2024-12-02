@@ -15,8 +15,8 @@ interface RequestBody {
 
 export async function POST(
   request: Request,
-  context: { params: RequestParams["params"] }
-): Promise<Response> {
+  { params }: { params: Promise<{ threadId: string }> }
+) {
   try {
     const { content } = (await request.json()) as RequestBody;
     const assistantId = process.env.NEXT_PUBLIC_OPEN_AI_ASSISTANT_ID;
@@ -25,7 +25,7 @@ export async function POST(
       return new Response("Assistant ID is required", { status: 400 });
     }
 
-    const { threadId } = context.params;
+    const { threadId } = await params;
 
     await openai.beta.threads.messages.create(threadId, {
       role: "user",
@@ -69,11 +69,11 @@ export async function POST(
 }
 
 export async function GET(
-  _: Request,
-  context: { params: RequestParams["params"] }
-): Promise<Response> {
+  request: Request,
+  { params }: { params: Promise<{ threadId: string }> }
+) {
   try {
-    const { threadId } = await context.params;
+    const { threadId } = await params;
 
     // Hämta och sortera meddelandena från äldsta till nyaste
     const messages = await openai.beta.threads.messages.list(threadId);
@@ -88,17 +88,19 @@ export async function GET(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { threadId: string } }
+  { params }: { params: Promise<{ threadId: string }> }
 ) {
   try {
+    const { threadId } = await params;
+
     // Delete from OpenAI
-    await openai.beta.threads.del(params.threadId);
+    await openai.beta.threads.del(threadId);
 
     // Delete from database
-    //   await db
-    //     .delete(searches)
-    //     .where(eq(searches.threadId, params.threadId))
-    //     .execute();
+    // await db
+    //   .delete(searches)
+    //   .where(eq(searches.threadId, threadId))
+    //   .execute();
 
     return NextResponse.json({ success: true });
   } catch (error) {

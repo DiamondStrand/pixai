@@ -5,9 +5,9 @@ export const runtime = "nodejs";
 
 export async function GET(
   request: Request,
-  { params }: { params: { threadId: string } }
+  { params }: { params: Promise<{ threadId: string }> }
 ) {
-  const { threadId } = params;
+  const { threadId } = await params;
   console.log("Fetching title and current_query for threadId:", threadId);
 
   if (!threadId) {
