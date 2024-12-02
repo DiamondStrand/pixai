@@ -20,8 +20,6 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@/db": ["./db/drizzle.ts"],
-      "@/db/schema": ["./db/schema.ts"],
       "@/utils": ["./src/utils/*"],
     }
   },
