@@ -54,8 +54,8 @@ export async function POST(request: Request) {
       titleAndDescriptionResponse.choices[0]?.message?.content || "";
 
     const lines = responseText.split("\n").filter(Boolean);
-    let title = lines[0]?.replace(/^Titel:\s*/, "").trim() || "";
-    let description =
+    const title = lines[0]?.replace(/^Titel:\s*/, "").trim() || "";
+    const description =
       lines[1]?.replace(/^Beskrivning:\s*/, "").trim() || body.content;
 
     const run = await openai.beta.threads.runs.create(thread.id, {
