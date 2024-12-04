@@ -1,10 +1,25 @@
 import { CreateUserData, CreateUserResult, User } from "@/lib/types";
 import { createClient } from "@/utils/supabase/server";
+import { sendDiscordNotification } from "@/utils/discord";
 
 export async function createUser(
   userData: CreateUserData
 ): Promise<CreateUserResult> {
+  // Add Gmail validation
+  if (!userData.email.toLowerCase().endsWith("@gmail.com")) {
+    return {
+      success: false,
+      error: {
+        code: "INVALID_EMAIL",
+        message: "Only Gmail addresses are accepted",
+      },
+    };
+  }
+
   const supabase = await createClient();
+
+  // Get current time with timezone information
+  const now = new Date().toISOString();
 
   try {
     // Check if email exists
@@ -33,32 +48,6 @@ export async function createUser(
       };
     }
 
-    // Check if phone number exists - updated to match email check pattern
-    const { data: existingPhone, error: phoneError } = await supabase
-      .from("user_profiles")
-      .select("id")
-      .eq("phone_number", userData.phone);
-
-    if (phoneError) {
-      return {
-        success: false,
-        error: {
-          code: "DATABASE_ERROR",
-          message: "Error checking existing phone",
-        },
-      };
-    }
-
-    if (existingPhone && existingPhone.length > 0) {
-      return {
-        success: false,
-        error: {
-          code: "PHONE_EXISTS",
-          message: "Phone number already exists",
-        },
-      };
-    }
-
     // Create user
     const { data: user, error: userError } = await supabase
       .from("users")
@@ -66,6 +55,7 @@ export async function createUser(
         {
           email: userData.email,
           status: "pending",
+          terms_accepted_at: now, // Use the timezone-aware timestamp
         },
       ])
       .select<"*", User>()
@@ -88,9 +78,8 @@ export async function createUser(
           id: user.id,
           first_name: userData.firstname,
           last_name: userData.lastname,
-          phone_number: userData.phone,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
+          created_at: now, // Use the same timestamp
+          updated_at: now, // Use the same timestamp
         },
       ]);
 
@@ -105,6 +94,11 @@ export async function createUser(
       }
       throw profileError;
     }
+
+    // After successful user creation, send Discord notification
+    await sendDiscordNotification(
+      `🎉 Ny användare registrerad!\nNamn: ${userData.firstname} ${userData.lastname}\nEmail: ${userData.email}`
+    );
 
     return {
       success: true,

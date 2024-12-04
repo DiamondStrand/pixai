@@ -9,9 +9,7 @@ export async function POST(request: Request) {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=${
-          redirectTo || ""
-        }`,
+        redirectTo: "/auth/callback",
         queryParams: {
           access_type: "offline",
           prompt: "consent",

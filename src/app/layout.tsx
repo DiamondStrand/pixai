@@ -81,7 +81,7 @@ export default function RootLayout({
           <Header />
           {children}
           <FooterSection />
-          <Toaster />
+          <Toaster richColors  />
         </ThemeProvider>
       </body>
     </html>

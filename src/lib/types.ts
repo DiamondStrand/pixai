@@ -116,7 +116,7 @@ export interface CreateUserResult {
   success: boolean;
   user?: User;
   error?: {
-    code: "EMAIL_EXISTS" | "PHONE_EXISTS" | "DATABASE_ERROR";
+    code: "EMAIL_EXISTS" | "PHONE_EXISTS" | "DATABASE_ERROR" | "INVALID_EMAIL";
     message: string;
   };
 }
@@ -124,7 +124,6 @@ export interface CreateUserResult {
 export interface CreateUserData {
   firstname: string;
   lastname: string;
-  phone: string;
   email: string;
 }
 

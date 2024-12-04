@@ -1,16 +1,13 @@
 'use client';
 
-import { Button } from '../ui/button'; // Adjust the import based on your project structure
-import { useState } from 'react';
-import { useRouter } from 'next/navigation'; // Update this import
+import { Button } from '../ui/button';
+import { useRouter } from 'next/navigation';
 
 export function BetaCTASection() {
-  const [email, setEmail] = useState('');
-  const router = useRouter(); // Add this line
+  const router = useRouter();
 
   return (
     <>
-      {/* Beta CTA Section */}
       <div className="relative overflow-hidden py-24 lg:py-32">
         {/* Gradients */}
         <div
@@ -27,27 +24,24 @@ export function BetaCTASection() {
               {/* Title */}
               <div className="mt-5 max-w-2xl">
                 <h2 className="scroll-m-20 text-5xl font-extrabold tracking-tight lg:text-6xl">
-                Vill du vara först med att uppleva framtidens AI?
+                  Var först med att uppleva framtidens AI tjänster!
                 </h2>
               </div>
               {/* End Title */}
-              <div className="mt-5 max-w-3xl">
+              <div className="mt-5 max-w-5xl">
                 <p className="text-xl text-muted-foreground">
-                Bli en del av framtiden! Prata med vår smarta AI-assistent Maia och anmäl ditt intresse för att bli en betatestare. Din feedback hjälper oss att finslipa och förbättra PixAI.
+                  Bli en del av framtiden! Anmäl ditt intresse för att bli en betatestare. Din feedback hjälper oss att finslipa och förbättra PixAI.
                 </p>
               </div>
-              {/* Signup Button */}
               <div className="mt-8">
                 <Button onClick={() => router.push('/register')}>
-                  Chatta med Maia nu!
+                  Anmäl ditt intresse
                 </Button>
               </div>
-              {/* End Signup Button */}
             </div>
           </div>
         </div>
       </div>
-      {/* End Beta CTA Section */}
     </>
   );
 }

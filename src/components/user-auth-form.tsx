@@ -15,9 +15,9 @@ function SearchParamsHandler({ onGoogleLogin }: { onGoogleLogin: (next: string) 
     <Button
       variant="outline"
       type="button"
-      size="lg"
+      size="xl"
       onClick={() => onGoogleLogin(next)}
-      className="w-full"
+      className="max-w-52 mx-auto"
     >
       Fortsätt med Google
     </Button>
